@@ -5,25 +5,36 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 7cfb96fe-41f5-11ee-004c-bb2d28aa4f6c
-using CSV, DataFramesMeta, Dates, Plots, Statistics, Colors, PlutoUI
+using CSV, DataFramesMeta, Dates, Plots, Measures, Statistics, Colors, PlutoUI
 
 # ╔═╡ 8453582e-bdc0-4968-bce2-1bdbfb5694f1
 md"""
 # Hotel Reservation Data Analysis
 
 ## Descriptive Questions:
- - What are the total and percent cancellations per month by type of hotel and market segment?
- - What factors are most impactful to a customer canceling a reservation?
+- How can we better account for hotel cancelations?
+- What factors are most impactful to a customer canceling a reservation?
 
 ## Predictive Questions:
  - Given a specific reservation data, what is the chance the reservation will be canceled?
+
+## Stakeholders
+The stakeholders for this case study will be the hotel manager and the the Chief Operations Officer for HotelStays.com (not a real company).
+
 """
 
 # ╔═╡ 735d8b1d-b79e-4a3f-a9ac-2eb1d813a93a
-md"Dataset taken from [Jesse Mostipak's Kaggle page](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)"
+md"""
+## Dataset Properties
+Dataset taken from [Jesse Mostipak's Kaggle page](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)
+
+The data is originally from the article [Hotel Booking Demand](https://www.sciencedirect.com/science/article/pii/S2352340918315191) Datasets, written by Nuno Antonio, Ana Almeida, and Luis Nunes for Data in Brief, Volume 22, February 2019.
+
+
+"""
 
 # ╔═╡ a6b48353-2803-4f8b-8195-9fb33ed7935f
-raw_hotel_data = CSV.File("hotel_bookings.csv", missingstring=["NULL","NA"]) |> DataFrame
+raw_hotel_data = CSV.File("hotel_bookings.csv.gz", missingstring=["NULL","NA"]) |> DataFrame
 
 # ╔═╡ 87dda8ed-243c-4a4f-8e0c-07adb59cd60a
 describe(raw_hotel_data)
@@ -36,6 +47,7 @@ md"""
 - Created 'arrival_month' column with numeric month values
 - Combined 'arrival' date columns into a single date column
 - Dropped (4) rows with missing values in 'children' column
+- Dropped (119386 - 87392) = 31998 duplicate rows
 """
 
 # ╔═╡ e7933a9e-1dca-4884-9a4a-ba81509ce815
@@ -47,7 +59,9 @@ cleaned_hotel_data = let
 	
 	df.arrival_date = Date.(df.arrival_date_year, df.arrival_month, df.arrival_date_day_of_month)
 	
-	dropmissing(df, :children)
+	df = dropmissing(df, :children)
+
+	unique(df)
 end
 
 # ╔═╡ 9ac8690e-a65e-42a6-9eb9-3a6e1223bcd9
@@ -73,6 +87,9 @@ hotel_data_by_month_and_type = let
 	select(df, Not(:arrival_month_unique))
 end
 
+# ╔═╡ 60f402e3-2eea-4a72-a121-b659b8125e8b
+md"#### Figure 1"
+
 # ╔═╡ 883c93fa-2d7a-4308-aa38-16e08a912c6e
 let
 	city_hotel_df = @subset(hotel_data_by_month_and_type, :hotel .== "City Hotel")
@@ -80,6 +97,7 @@ let
 	
 	plot(
 		size=(1000,500),
+		margin=5mm,
 		plot(
 			city_hotel_df.arrival_date_month, 
 			[ 
@@ -103,7 +121,7 @@ let
 			xrotation=45,
 			labels=["" ""],
 			ylim=(0,100),
-			title="% Cancelations",
+			title="Average % Cancelations",
 			linewidth=2,
 		),
 	)
@@ -149,6 +167,9 @@ hotel_data_by_market_segment = let
 	sort!(df,:percent_canceled, rev=true)
 end
 
+# ╔═╡ 8a7e97ea-cc72-4147-ba5c-b8f88e500b94
+md"#### Figure 2"
+
 # ╔═╡ bfe0e58a-cfa4-4be8-92d1-94d6e86c675d
 let
 	df = hotel_data_by_market_segment
@@ -162,19 +183,22 @@ end
 # ╔═╡ 51aec1e0-42c9-43da-8fdc-a3938b861ff1
 md"""
 ### Observations
-- Cancelations for **groups** are the highest at **61%**.
-- Reservations made online and offline by **travel agencies** are roughly equal at **35%**.
-- City hotels experience **10-20% more** cancelations than resort hotels, depending on the season.
+- Cancelations for **Online TA** are the highest at **35%**.
+- Reservations made direct contact and offline by **travel agencies** are roughly equal at **15%**.
+- City hotels experience **10% more** cancelations during the non-summer months than resort hotels.
 
 ### Recommendations
-- Anticipate roughly **40%** cancelations year-round for **city hotels** and **20-30%** cancelations for **resort hotels**, with higher rates in the summer and fall months and lower rates in the winter and spring months.
-- Consider overbooking reservations by month according to the average cancelation rate for a given month, with a buffer at or around the margin of error.
+- Anticipate roughly **30%** cancelations year-round for **city hotels** and **~20-30%** cancelations for **resort hotels**, with higher rates in the summer months. Refer to figure 1 for details.
+- Consider overbooking reservations by month according to the average cancelation rate for a given month, with a buffer at or around the margin of error (TBD).
 """
 
 # ╔═╡ 02520ff0-a3cd-4854-a027-76ac77570f51
 md"""
 ## Correlations to cancelations
 """
+
+# ╔═╡ f2b899c3-21ac-43f0-8900-3c556596be62
+md"#### Figure 3"
 
 # ╔═╡ cac22e57-a664-41c1-9619-61a36dcbe141
 let
@@ -202,15 +226,9 @@ let
 		title="Correlations to Cancelations",
 		size=(800,500),
 		legend=false,
+		margin=10mm,
 	)
 end
-
-# ╔═╡ 4636e2f9-3a6b-491d-9e3c-5b4aa0352450
-md"""
-## Cancelation Predictions
-
-
-"""
 
 # ╔═╡ bec9e9c4-24c7-467b-b68c-d4b4a79b59da
 md"""
@@ -221,6 +239,13 @@ md"""
 ### Recommendations
 - Assign less certainity to booking with long lead times
 - Assign more certainty to booking with special requests, changes and a high amount of requested parking spots.
+
+"""
+
+# ╔═╡ 4636e2f9-3a6b-491d-9e3c-5b4aa0352450
+md"""
+## Cancelation Predictions
+
 
 """
 
@@ -250,6 +275,7 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
@@ -258,6 +284,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 CSV = "~0.10.11"
 Colors = "~0.12.10"
 DataFramesMeta = "~0.14.0"
+Measures = "~0.3.2"
 Plots = "~1.38.17"
 PlutoUI = "~0.7.52"
 """
@@ -266,9 +293,9 @@ PlutoUI = "~0.7.52"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.2"
+julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "e41c95ae598e87e47d1ec7f32bf8ac3f9369526b"
+project_hash = "32691ad2b55d39d0a4b1e5b41810b0b5a2a92e28"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1398,21 +1425,24 @@ version = "1.4.1+0"
 # ╟─a6b48353-2803-4f8b-8195-9fb33ed7935f
 # ╟─87dda8ed-243c-4a4f-8e0c-07adb59cd60a
 # ╟─98cc159b-8c6d-4946-bc94-c38877735c62
-# ╠═e7933a9e-1dca-4884-9a4a-ba81509ce815
+# ╟─e7933a9e-1dca-4884-9a4a-ba81509ce815
 # ╟─9ac8690e-a65e-42a6-9eb9-3a6e1223bcd9
 # ╟─0345077b-72e3-448f-b186-a5b3f1bc9585
 # ╟─aebb48a9-4bdf-4e43-b63b-4d2bfb0bb08b
+# ╟─60f402e3-2eea-4a72-a121-b659b8125e8b
 # ╟─883c93fa-2d7a-4308-aa38-16e08a912c6e
 # ╟─629eb5d0-ef0b-420e-b15d-41b9828b6a3f
 # ╟─c908c1c4-2c62-43a5-b221-8f32fb734e0d
 # ╟─5a074304-afc4-4fcc-b5ae-5f300ff20864
 # ╟─e1bbeb7a-0c7d-4ce4-8372-6a51a88d0bef
+# ╟─8a7e97ea-cc72-4147-ba5c-b8f88e500b94
 # ╟─bfe0e58a-cfa4-4be8-92d1-94d6e86c675d
 # ╟─51aec1e0-42c9-43da-8fdc-a3938b861ff1
 # ╟─02520ff0-a3cd-4854-a027-76ac77570f51
+# ╟─f2b899c3-21ac-43f0-8900-3c556596be62
 # ╟─cac22e57-a664-41c1-9619-61a36dcbe141
-# ╠═4636e2f9-3a6b-491d-9e3c-5b4aa0352450
 # ╟─bec9e9c4-24c7-467b-b68c-d4b4a79b59da
+# ╟─4636e2f9-3a6b-491d-9e3c-5b4aa0352450
 # ╟─0f286692-9e76-4252-9b83-c9aad80fb0eb
 # ╠═c434ec1d-8f6e-436e-ad5a-07e414d92ad8
 # ╠═7cfb96fe-41f5-11ee-004c-bb2d28aa4f6c
