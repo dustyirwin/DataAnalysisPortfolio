@@ -173,10 +173,13 @@ md"#### Figure 2"
 # ╔═╡ bfe0e58a-cfa4-4be8-92d1-94d6e86c675d
 let
 	df = hotel_data_by_market_segment
-	pie(
+	bar(
 		df.market_segment,
-		df.cancelations,
+		df.percent_canceled,
 		title="Cancelations by Market Segment",
+		ylabel="% canceled",
+		legend=false,
+		margin=5mm
 	)
 end
 
