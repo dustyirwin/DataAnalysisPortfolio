@@ -1,1 +1,8 @@
 .vscode
+*.bin
+*.jls
+shapefiles
+
+\choropleths\data\*.*
+
+\decisiontree_classifer\models\*.*

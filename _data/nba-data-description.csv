@@ -1,0 +1,12 @@
+Column name,Type,Description
+fg,int,Made Field goal percentage
+3p,int,Made 3-point field goal percentage
+ft,int,Made free throw percentage
+reb,int,Average rebounds per game
+ast,int,Average assists per game
+stl,int,Average steals per game
+blk,int,Average blocks per game
+tov,int,Average turnovers per game
+target_5yrs,int,"Players career duration was more than 5 years (0= yes, 1=no)"
+total_points,int,Total number of points scored across 5 years
+efficiency,int,Total points divided by minutes played per game
