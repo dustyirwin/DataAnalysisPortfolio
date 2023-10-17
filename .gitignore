@@ -1,8 +1,10 @@
 .vscode
 *.bin
 *.jls
+*.gsheet
+
 shapefiles
 
-\choropleths\data\*.*
+choropleths\data
 
-\decisiontree_classifer\models\*.*
+decisiontree_classifer\models
