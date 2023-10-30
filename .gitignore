@@ -3,8 +3,13 @@
 *.jls
 *.gsheet
 
-shapefiles
 
-choropleths\data
+# Ignore all files in the following directories
+shapefiles/
+decisiontree_classifer\models/
+choropleths/data/
 
-decisiontree_classifer\models
+case_studies/Bros_Video_Game_Sales/raw_data/
+case_studies/Bros_Video_Game_Sales/cleaned_data/
+
+case_studies/MtG_Complexity/*.gz

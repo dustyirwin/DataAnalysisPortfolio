@@ -59,12 +59,6 @@ Using random sampling with an 80 / 20 split. `RatecodeID` has been coerced into 
 # ╔═╡ 6894bd66-7504-45d9-ba2d-a6a3d211102e
 md"## Linear Regression Model"
 
-# ╔═╡ 4e178fea-d297-453e-b594-badf4a021297
-# ╠═╡ disabled = true
-#=╠═╡
-MLJ.save("NYC_TLC_lr.jls", lr)
-  ╠═╡ =#
-
 # ╔═╡ 0f1e1cc2-a3b0-4f48-bf5a-0734c275b949
 md"### Linear Model Metrics on Test Dataset"
 
@@ -140,12 +134,6 @@ md""" ### Model persistance
 
 Model persistance is turned off by default, enable the cell below to re-save the model.
 """
-
-# ╔═╡ d94217b1-d609-4e7b-b2c4-eefd89659457
-# ╠═╡ disabled = true
-#=╠═╡
-MLJ.save("NYC_TLC_rf_model.jls", rf_mach)
-  ╠═╡ =#
 
 # ╔═╡ f3fd686a-579f-4dd6-bd19-19098afdd0ab
 md"""
@@ -2924,7 +2912,7 @@ version = "1.4.1+1"
 # ╟─cacbda92-b7d1-4a9c-ad5c-bb2facd579de
 # ╠═4b191ebd-6db2-4938-a079-fa1c383019a9
 # ╟─05c10fc2-c534-46f1-8757-f6277fa0bb1e
-# ╠═5d780d25-02cc-4348-b977-d078f8d595a0
+# ╟─5d780d25-02cc-4348-b977-d078f8d595a0
 # ╟─3ce4a4da-4764-45c6-b839-e62786abe4da
 # ╠═d94217b1-d609-4e7b-b2c4-eefd89659457
 # ╟─2efb803d-7a98-4b75-b7e2-b67344a06b3a
