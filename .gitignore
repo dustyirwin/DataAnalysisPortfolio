@@ -9,7 +9,7 @@ shapefiles/
 decisiontree_classifer\models/
 choropleths/data/
 
-case_studies/Bros_Video_Game_Sales/raw_data/
-case_studies/Bros_Video_Game_Sales/cleaned_data/
+case_studies/eBay_Video_Game_Sales/raw_data/
+case_studies/eBay_Video_Game_Sales/cleaned_data/
 
 case_studies/MtG_Complexity/*.gz
